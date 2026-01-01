@@ -49,7 +49,7 @@ worktree-tuiは、Gitのworktree機能を直感的に操作できるターミナ
 
 ### プログラミング言語
 - Go言語を使用
-- TUIライブラリとして[bubbletea](https://github.com/charmbracelet/bubbletea)を採用
+- TUIライブラリとして[Bubble Tea](https://github.com/charmbracelet/bubbletea)を採用
 
 ### システム要件
 - Git 2.5以降（worktree機能のサポート）
