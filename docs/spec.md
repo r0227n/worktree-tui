@@ -13,10 +13,8 @@ React + OpenTUIを使用した、git worktreeの操作をサポートするタ�
 - **技術スタック**: TypeScript + React + OpenTUI
 - **対象プラットフォーム**: macOS, Linux, WSL2
 - **前提条件**:
-  - Node.js 18+
-  - Git 2.22+
-  - Zig (OpenTUIビルド用)
-  - git-worktree-runner (gtr) インストール済み
+  - Bun 1.3.5
+  - Zig 0.15.1
 
 ---
 
@@ -331,16 +329,15 @@ worktree-tui/
 ```json
 {
   "dependencies": {
-    "@opentui/react": "^0.1.65",
-    "@opentui/core": "^0.1.65",
-    "react": "^18.3.1",
-    "simple-git": "^3.25.0"
+    "@opentui/react": "^0.1.67",
+    "@opentui/core": "^0.1.67",
+    "react": "^19.2.3",
+    "simple-git": "^3.30.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/node": "^20.11.0",
-    "typescript": "^5.3.3",
-    "bun-types": "^1.0.0"
+    "@types/react": "^19.2.7",
+    "typescript": "^5.9.3",
+    "bun-types": "^1.3.5"
   }
 }
 ```
@@ -493,4 +490,3 @@ worktree-tui/
 - [git-worktree-runner](https://github.com/coderabbitai/git-worktree-runner)
 - [simple-git](https://github.com/steveukx/git-js)
 - [Git Worktree公式ドキュメント](https://git-scm.com/docs/git-worktree)
-
