@@ -1,0 +1,23 @@
+{
+  "recommendations": [
+    // 必須: Linter & Formatter
+    "oxc.oxc-vscode",
+    "dprint.dprint",
+    // 必須: ランタイム
+    "oven.bun-vscode",
+    // 推奨: ツール連携
+    "hverlin.mise-vscode",
+    // 推奨: Git
+    "eamodio.gitlens",
+    // 推奨: 開発効率化
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "streetsidesoftware.code-spell-checker"
+  ],
+  "unwantedRecommendations": [
+    // 競合するため非推奨
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "biomejs.biome"
+  ]
+}

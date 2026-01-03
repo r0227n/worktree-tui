@@ -1,0 +1,148 @@
+# mise.toml - Tool version management for worktree-tui
+# https://mise.jdx.dev
+
+[tools]
+bun = "1.3.5"
+zig = "0.14.1"
+dprint = "0.49.0"
+
+[env]
+NODE_ENV = "development"
+FORCE_COLOR = "1"
+
+# =============================================================================
+# Development Tasks
+# =============================================================================
+
+[tasks.dev]
+description = "Start development server with watch mode"
+run = "bun run --watch src/index.tsx"
+
+[tasks.build]
+description = "Build the application"
+run = "bun build src/index.tsx --outdir dist --target bun"
+
+[tasks.start]
+description = "Run the built application"
+depends = ["build"]
+run = "bun run dist/index.js"
+
+# =============================================================================
+# Code Quality Tasks
+# =============================================================================
+
+[tasks.lint]
+description = "Run linter"
+run = "bunx oxlint"
+
+[tasks."lint:fix"]
+description = "Run linter with auto-fix"
+run = "bunx oxlint --fix $@"
+
+[tasks."lint:types"]
+description = "Run linter with type-aware rules"
+run = "bunx oxlint --type-aware"
+
+[tasks.spell]
+description = "Run spell check"
+run = "bunx cspell $@"
+
+[tasks.format]
+description = "Format all files"
+run = """
+bunx oxfmt
+bunx dprint fmt
+"""
+
+[tasks."format:ts"]
+description = "Format TypeScript/JavaScript files"
+run = "bunx oxfmt $@"
+
+[tasks."format:other"]
+description = "Format other files (markdown, yaml, toml, css)"
+run = "bunx dprint fmt $@"
+
+[tasks."format:check"]
+description = "Check formatting without writing"
+run = """
+bunx oxfmt --check
+bunx dprint check
+"""
+
+[tasks.typecheck]
+description = "Run TypeScript type checking"
+run = "bun tsc --noEmit"
+
+[tasks.check]
+description = "Run all checks (lint, format, typecheck)"
+depends = ["lint", "format:check", "typecheck"]
+run = "echo '✅ All checks passed!'"
+
+[tasks.fix]
+description = "Fix all auto-fixable issues"
+depends = ["lint:fix", "format"]
+run = "echo '✅ All fixes applied!'"
+
+# =============================================================================
+# Test Tasks
+# =============================================================================
+
+[tasks.test]
+description = "Run tests"
+run = "bun test"
+
+[tasks."test:watch"]
+description = "Run tests in watch mode"
+run = "bun test --watch"
+
+[tasks."test:coverage"]
+description = "Run tests with coverage"
+run = "bun test --coverage"
+
+# =============================================================================
+# CI Tasks
+# =============================================================================
+
+[tasks.ci]
+description = "Run CI pipeline"
+depends = ["lint", "format:check", "typecheck", "test"]
+run = "echo '✅ CI pipeline passed!'"
+
+# =============================================================================
+# Utility Tasks
+# =============================================================================
+
+[tasks.clean]
+description = "Clean build artifacts and caches"
+run = "rm -rf dist coverage .dprint node_modules/.cache"
+
+[tasks.doctor]
+description = "Check development environment"
+run = """
+echo '🔍 Checking environment...'
+echo ''
+echo '📦 Tools:'
+mise ls
+echo ''
+echo '🔧 Versions:'
+bun --version
+zig version
+dprint --version
+bunx oxlint --version
+bunx oxfmt --version || echo 'oxfmt: installed via bunx'
+echo ''
+echo '📁 Project:'
+ls -la
+echo ''
+echo '✅ Environment check complete!'
+"""
+
+[tasks.setup]
+description = "Initial project setup"
+run = """
+echo '🚀 Setting up worktree-tui...'
+mise install
+bun install
+bunx lefthook install
+echo '✅ Setup complete!'
+"""

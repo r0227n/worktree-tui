@@ -23,9 +23,11 @@ React + OpenTUIを使用した、git worktreeの操作をサポートするタ�
 ### 1. Worktree一覧表示
 
 #### 機能概要
+
 リポジトリ内の全worktreeを一覧表示し、キーボードで選択可能にする。
 
 #### 実装詳細
+
 ```typescript
 // git worktree list --porcelain の出力をパース
 interface Worktree {
@@ -47,6 +49,7 @@ interface Worktree {
 ```
 
 #### 表示情報
+
 - ブランチ名
 - パス
 - HEADコミット（短縮SHA）
@@ -58,9 +61,11 @@ interface Worktree {
 ### 2. Worktree間の移動
 
 #### 機能概要
+
 選択したworktreeに作業ディレクトリを移動する。
 
 #### 実装詳細
+
 ```typescript
 const moveToWorktree = (worktreePath: string) => {
   process.chdir(worktreePath);
@@ -70,6 +75,7 @@ const moveToWorktree = (worktreePath: string) => {
 ```
 
 #### キーバインド
+
 - `Enter`: 選択したworktreeに移動
 - `↑/↓`: リスト内を移動
 - `Tab`: 次のworktreeに移動
@@ -79,9 +85,11 @@ const moveToWorktree = (worktreePath: string) => {
 ### 3. Build/Runコマンドの実行
 
 #### 機能概要
+
 選択したworktree上でビルド、テスト、実行などのコマンドを実行する。
 
 #### 実装詳細
+
 ```typescript
 import { spawn } from 'child_process';
 
@@ -104,11 +112,13 @@ const runCommand = (command: string, cwd: string) => {
 ```
 
 #### サポートコマンド
+
 - `npm install` / `npm run build` / `npm test`
 - カスタムコマンド（ユーザー定義）
 - git-worktree-runnerのhook実行
 
 #### UI
+
 ```
 ┌─ Command Output ────────────────────────┐
 │ $ npm run build                         │
@@ -124,9 +134,11 @@ const runCommand = (command: string, cwd: string) => {
 ### 4. Git操作のサポート
 
 #### 機能概要
+
 基本的なgit操作をTUI内で実行可能にする。
 
 #### サポート操作
+
 - `git status` - ワークツリーの状態表示
 - `git add` - ステージング
 - `git commit` - コミット（メッセージ入力UI）
@@ -134,6 +146,7 @@ const runCommand = (command: string, cwd: string) => {
 - `git branch` - ブランチ一覧・作成・削除
 
 #### 実装例（simple-git使用）
+
 ```typescript
 import simpleGit from 'simple-git';
 
@@ -151,6 +164,7 @@ await git.push('origin', currentBranch);
 ```
 
 #### インタラクティブコミットUI
+
 ```
 ┌─ Git Commit ────────────────────────────┐
 │ Message:                                │
@@ -172,9 +186,11 @@ await git.push('origin', currentBranch);
 ### 5. git-worktree-runner連携
 
 #### 機能概要
+
 `gtr`コマンドをTUI内から実行し、worktree管理を簡易化する。
 
 #### 連携コマンド
+
 - `gtr new <branch>` - 新規worktree作成
 - `gtr rm <branch>` - worktree削除
 - `gtr list` - worktree一覧（TUIの一覧表示に統合）
@@ -182,6 +198,7 @@ await git.push('origin', currentBranch);
 - `gtr ai <branch>` - AIツール起動
 
 #### 実装例
+
 ```typescript
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -202,6 +219,7 @@ const removeWorktree = async (branch: string) => {
 ```
 
 #### 設定読み込み
+
 ```typescript
 // gtrの設定を読み込む
 const getGtrConfig = async (key: string): Promise<string> => {
@@ -227,7 +245,7 @@ const defaultEditor = await getGtrConfig('gtr.editor.default');
 ├─ Worktrees ─────────────────────────────────────────────────────┤
 │  ▶ main          ~/project/main              [clean]            │
 │    feature-auth  ~/project-worktrees/feat..  [2 changes]        │
-│    hotfix-123    ~/project-worktrees/hotf..  [uncommitted]      │
+│    hotfix-123    ~/project-worktrees/fix..  [uncommitted]      │
 │                                                                  │
 ├─ Actions ───────────────────────────────────────────────────────┤
 │  [n] New  [d] Delete  [e] Editor  [g] Git  [b] Build  [?] Help  │
@@ -255,37 +273,41 @@ const theme = {
 ## キーボードショートカット
 
 ### グローバル
-| キー | 動作 |
-|------|------|
-| `↑/↓` | worktree選択移動 |
-| `Enter` | 選択したworktreeに移動 |
-| `Esc` | メニュー/ダイアログを閉じる |
-| `Ctrl+C` | アプリケーション終了 |
-| `?` | ヘルプ表示 |
+
+| キー     | 動作                        |
+| -------- | --------------------------- |
+| `↑/↓`    | worktree選択移動            |
+| `Enter`  | 選択したworktreeに移動      |
+| `Esc`    | メニュー/ダイアログを閉じる |
+| `Ctrl+C` | アプリケーション終了        |
+| `?`      | ヘルプ表示                  |
 
 ### Worktree操作
-| キー | 動作 |
-|------|------|
-| `n` | 新規worktree作成 |
-| `d` | 選択worktreeを削除 |
-| `r` | worktreeリフレッシュ |
+
+| キー | 動作                 |
+| ---- | -------------------- |
+| `n`  | 新規worktree作成     |
+| `d`  | 選択worktreeを削除   |
+| `r`  | worktreeリフレッシュ |
 
 ### 開発操作
-| キー | 動作 |
-|------|------|
-| `b` | ビルド実行 |
-| `t` | テスト実行 |
-| `s` | 開発サーバー起動 |
-| `e` | エディタで開く |
+
+| キー | 動作             |
+| ---- | ---------------- |
+| `b`  | ビルド実行       |
+| `t`  | テスト実行       |
+| `s`  | 開発サーバー起動 |
+| `e`  | エディタで開く   |
 
 ### Git操作
-| キー | 動作 |
-|------|------|
-| `g s` | git status |
+
+| キー  | 動作                   |
+| ----- | ---------------------- |
+| `g s` | git status             |
 | `g a` | git add (ステージング) |
-| `g c` | git commit |
-| `g p` | git push |
-| `g l` | git log |
+| `g c` | git commit             |
+| `g p` | git push               |
+| `g l` | git log                |
 
 ---
 
@@ -399,27 +421,32 @@ worktree-tui/
 ## 実装フェーズ
 
 ### Phase 1: 基本機能（2週間）
+
 - [x] プロジェクトセットアップ
 - [ ] worktree一覧表示
 - [ ] worktree選択・移動
 - [ ] 基本的なキーボードナビゲーション
 
 ### Phase 2: Git連携（1週間）
+
 - [ ] git status表示
 - [ ] simple-git統合
 - [ ] 基本的なgit操作（add, commit, push）
 
 ### Phase 3: gtr連携（1週間）
+
 - [ ] gtr new/rm コマンド実行
 - [ ] gtr設定読み込み
 - [ ] エディタ・AIツール起動
 
 ### Phase 4: コマンド実行（1週間）
+
 - [ ] ビルド・テスト実行
 - [ ] リアルタイム出力表示
 - [ ] エラーハンドリング
 
 ### Phase 5: UI改善（1週間）
+
 - [ ] カラースキーマ実装
 - [ ] ステータスバー実装
 - [ ] ヘルプモーダル
@@ -431,17 +458,17 @@ worktree-tui/
 
 ### 技術リスク
 
-| リスク | 対策 |
-|--------|------|
-| OpenTUIの不安定性 | Inkへの移行パスを確保 |
+| リスク               | 対策                                       |
+| -------------------- | ------------------------------------------ |
+| OpenTUIの不安定性    | Inkへの移行パスを確保                      |
 | ターミナル互換性問題 | 主要ターミナル(iTerm2, Terminal.app)で検証 |
-| git操作の失敗 | エラーハンドリングとロールバック機能 |
+| git操作の失敗        | エラーハンドリングとロールバック機能       |
 
 ### 開発リスク
 
-| リスク | 対策 |
-|--------|------|
-| TypeScript初心者 | 小さい単位で段階的に実装 |
+| リスク                  | 対策                                  |
+| ----------------------- | ------------------------------------- |
+| TypeScript初心者        | 小さい単位で段階的に実装              |
 | OpenTUIドキュメント不足 | 公式exampleとコミュニティコードを参考 |
 
 ---
@@ -449,16 +476,19 @@ worktree-tui/
 ## テスト戦略
 
 ### 単体テスト
+
 - worktreeパース処理
 - gitコマンド実行
 - 状態管理ロジック
 
 ### 統合テスト
+
 - worktree作成・削除フロー
 - git操作の一連の流れ
 - gtr連携
 
 ### E2Eテスト（手動）
+
 - 実際のリポジトリでの動作確認
 - キーボード操作の検証
 - エラーケースの確認
@@ -479,8 +509,6 @@ worktree-tui/
 - gitコマンドインジェクション対策（入力サニタイズ）
 - credential情報の非表示化
 - 設定ファイルのパーミッション確認
-
-
 
 ---
 

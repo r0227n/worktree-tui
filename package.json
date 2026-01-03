@@ -1,0 +1,71 @@
+{
+  "name": "worktree-tui",
+  "version": "0.1.0",
+  "description": "Git worktree manager with terminal multiplexer and AI agent integration",
+  "type": "module",
+  "license": "MIT",
+  "author": "Ryo24",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryo24/worktree-tui.git"
+  },
+  "keywords": [
+    "git",
+    "worktree",
+    "tui",
+    "terminal",
+    "cli"
+  ],
+  "bin": {
+    "worktree-tui": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "bun run --watch src/index.tsx",
+    "build": "bun build src/index.tsx --outdir dist --target bun",
+    "start": "bun run dist/index.js",
+
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "lint:types": "oxlint --type-aware",
+
+    "format": "oxfmt && dprint fmt",
+    "format:check": "oxfmt --check && dprint check",
+    "format:ts": "oxfmt --write",
+    "format:other": "dprint fmt",
+
+    "typecheck": "tsc --noEmit",
+
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage",
+
+    "check": "bun run lint && bun run format:check && bun run typecheck",
+    "fix": "bun run lint:fix && bun run format",
+
+    "prepare": "lefthook install",
+    "clean": "rm -rf dist coverage .dprint"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.1.65",
+    "@opentui/react": "^0.1.65",
+    "react": "^19.2.3",
+    "simple-git": "^3.30.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "bun-types": "^1.3.5",
+    "dprint": "^0.49.0",
+    "lefthook": "^1.11.0",
+    "oxfmt": "^0.5.0",
+    "oxlint": "^1.0.0",
+    "oxlint-tsgolint": "^0.10.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.3.5"
+  },
+  "packageManager": "bun@1.3.5"
+}
