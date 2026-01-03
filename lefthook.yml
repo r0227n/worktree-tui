@@ -12,7 +12,7 @@ pre-commit:
       stage_fixed: true
 
     format-ts:
-      glob: "*.{ts,tsx,js,jsx,json}"
+      glob: "*.{ts,tsx,js,jsx}"
       run: mise run format:ts -- {staged_files}
       stage_fixed: true
 
@@ -24,10 +24,6 @@ pre-commit:
     typecheck:
       glob: "*.{ts,tsx}"
       run: mise run typecheck
-
-    spell:
-      glob: "*.{ts,tsx,js,jsx,json,md,yaml,yml}"
-      run: mise run spell -- {staged_files}
 
 pre-push:
   parallel: true

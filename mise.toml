@@ -43,10 +43,6 @@ run = "bunx oxlint --fix $@"
 description = "Run linter with type-aware rules"
 run = "bunx oxlint --type-aware"
 
-[tasks.spell]
-description = "Run spell check"
-run = "bunx cspell $@"
-
 [tasks.format]
 description = "Format all files"
 run = """

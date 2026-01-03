@@ -12,7 +12,6 @@
     // 推奨: 開発効率化
     "usernamehw.errorlens",
     "christian-kohler.path-intellisense",
-    "streetsidesoftware.code-spell-checker"
   ],
   "unwantedRecommendations": [
     // 競合するため非推奨
