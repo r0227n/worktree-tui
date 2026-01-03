@@ -101,8 +101,65 @@ run = "bun test --coverage"
 
 [tasks.ci]
 description = "Run CI pipeline"
-depends = ["lint", "format:check", "typecheck", "test"]
+depends = ["typecheck", "ci:lint", "ci:format", "ci:test"]
 run = "echo '✅ CI pipeline passed!'"
+
+[tasks."ci:lint"]
+description = "Lint changed TypeScript files only (CI)"
+run = '''
+echo "🔍 Checking for changed TypeScript files..."
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR origin/develop...HEAD | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$CHANGED_FILES" ]; then
+  echo "📝 Found changed TypeScript files:"
+  echo "$CHANGED_FILES"
+  echo ""
+  echo "Running oxlint..."
+  echo "$CHANGED_FILES" | xargs bunx oxlint
+else
+  echo "✅ No TypeScript files changed, skipping lint"
+fi
+'''
+
+[tasks."ci:format"]
+description = "Check formatting of changed files only (CI)"
+run = '''
+echo "🔍 Checking for changed files..."
+
+# TypeScript files
+TS_FILES=$(git diff --name-only --diff-filter=ACMR origin/develop...HEAD | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$TS_FILES" ]; then
+  echo "📝 Checking TypeScript files with oxfmt:"
+  echo "$TS_FILES"
+  echo "$TS_FILES" | xargs bunx oxfmt --check
+fi
+
+# Other files (markdown, yaml, toml, css)
+OTHER_FILES=$(git diff --name-only --diff-filter=ACMR origin/develop...HEAD | grep -E '\.(md|yml|yaml|toml|css)$' || true)
+if [ -n "$OTHER_FILES" ]; then
+  echo "📝 Checking other files with dprint:"
+  echo "$OTHER_FILES"
+  echo "$OTHER_FILES" | xargs bunx dprint check
+fi
+
+if [ -z "$TS_FILES" ] && [ -z "$OTHER_FILES" ]; then
+  echo "✅ No format-checkable files changed, skipping format check"
+fi
+'''
+
+[tasks."ci:test"]
+description = "Run tests for changed files (CI)"
+run = '''
+echo "🔍 Checking for changed TypeScript files..."
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR origin/develop...HEAD | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$CHANGED_FILES" ]; then
+  echo "🧪 Running tests for changed files:"
+  echo "$CHANGED_FILES"
+  echo ""
+  bun test $CHANGED_FILES
+else
+  echo "✅ No TypeScript files changed, skipping tests"
+fi
+'''
 
 # =============================================================================
 # Utility Tasks

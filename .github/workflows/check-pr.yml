@@ -1,0 +1,68 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+concurrency:
+  group: check-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2
+
+      - name: Run lint
+        run: mise run ci:lint
+
+  format:
+    name: Format
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2
+
+      - name: Check formatting
+        run: mise run ci:format
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2
+
+      - name: Run type check
+        run: mise run typecheck
+
+  test:
+    name: Test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2
+
+      - name: Run tests
+        run: mise run ci:test
