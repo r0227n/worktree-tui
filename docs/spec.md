@@ -233,6 +233,383 @@ const defaultEditor = await getGtrConfig('gtr.editor.default');
 
 ---
 
+### 6. 設定ファイル管理
+
+#### 機能概要
+
+JSON形式の設定ファイルでアプリケーションの動作をカスタマイズ可能にする。
+
+#### 設定ファイルパス
+
+- `~/.worktree-tui/config.json`
+
+#### 設定項目
+
+```typescript
+interface Config {
+  // 言語設定
+  locale: "ja" | "en";
+
+  // diff表示のベースブランチ
+  baseBranch: string; // デフォルト: "develop"
+
+  // ショートカットキーのカスタマイズ
+  shortcuts: {
+    terminalPrefix: string; // デフォルト: "Alt"
+    splitHorizontal: string; // デフォルト: "Ctrl+Shift+H"
+    splitVertical: string; // デフォルト: "Ctrl+Shift+V"
+  };
+
+  // 事前定義コマンド
+  commands: {
+    name: string;
+    command: string;
+    description?: string;
+  }[];
+}
+```
+
+#### デフォルト設定
+
+```json
+{
+  "locale": "ja",
+  "baseBranch": "develop",
+  "shortcuts": {
+    "terminalPrefix": "Alt",
+    "splitHorizontal": "Ctrl+Shift+H",
+    "splitVertical": "Ctrl+Shift+V"
+  },
+  "commands": [
+    { "name": "build", "command": "npm run build", "description": "ビルド実行" },
+    { "name": "test", "command": "npm test", "description": "テスト実行" },
+    { "name": "dev", "command": "npm run dev", "description": "開発サーバー起動" }
+  ]
+}
+```
+
+---
+
+### 7. 多言語対応 (i18n)
+
+#### 機能概要
+
+UI表示を日本語・英語で切り替え可能にする。
+
+#### 対応言語
+
+- 日本語 (`ja`)
+- 英語 (`en`)
+
+#### 言語ファイル構造
+
+```
+src/i18n/
+├── index.ts         # i18n初期化
+├── locales/
+│   ├── ja.json      # 日本語
+│   └── en.json      # 英語
+└── useTranslation.ts # 翻訳フック
+```
+
+#### 言語ファイル例
+
+```json
+// ja.json
+{
+  "app": {
+    "title": "Git Worktree Manager"
+  },
+  "worktree": {
+    "list": "Worktree一覧",
+    "create": "新規作成",
+    "delete": "削除",
+    "switch": "切り替え"
+  },
+  "actions": {
+    "confirm": "確認",
+    "cancel": "キャンセル"
+  },
+  "status": {
+    "clean": "変更なし",
+    "modified": "{count}件の変更"
+  }
+}
+```
+
+---
+
+### 8. 履歴管理
+
+#### 機能概要
+
+`git gtr ai` 実行時のClaude Code入力履歴とworktree情報を保存・表示する。
+
+#### データ保存先
+
+- SQLite: `~/.worktree-tui/history.db`
+
+#### データベーススキーマ
+
+```sql
+-- worktree作成履歴
+CREATE TABLE worktree_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  worktree_name TEXT NOT NULL,
+  base_branch TEXT NOT NULL,
+  base_commit TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Claude Code入力履歴
+CREATE TABLE ai_prompt_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  worktree_id INTEGER REFERENCES worktree_history(id),
+  prompt TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### 実装例
+
+```typescript
+import { Database } from "bun:sqlite";
+
+const db = new Database("~/.worktree-tui/history.db");
+
+// 履歴保存
+const savePromptHistory = (worktreeId: number, prompt: string) => {
+  db.run(
+    "INSERT INTO ai_prompt_history (worktree_id, prompt) VALUES (?, ?)",
+    [worktreeId, prompt]
+  );
+};
+
+// 履歴取得
+const getPromptHistory = (worktreeName: string) => {
+  return db.query(`
+    SELECT p.prompt, p.created_at, w.base_branch, w.base_commit
+    FROM ai_prompt_history p
+    JOIN worktree_history w ON p.worktree_id = w.id
+    WHERE w.worktree_name = ?
+    ORDER BY p.created_at DESC
+  `).all(worktreeName);
+};
+```
+
+#### 表示UI
+
+```
+┌─ AI Prompt History ─────────────────────────────────┐
+│ Worktree: feature-auth                              │
+│ Base: develop (abc1234)                             │
+│                                                     │
+│ ● 2024-01-15 10:30                                  │
+│   「認証機能のログインフォームを実装して」           │
+│                                                     │
+│ ● 2024-01-15 11:45                                  │
+│   「バリデーションを追加して」                       │
+│                                                     │
+│ [↑/↓] 選択  [Enter] 詳細  [Esc] 閉じる             │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+### 9. Diff表示（シンタックスハイライト）
+
+#### 機能概要
+
+ベースブランチとworktree間の差分をシンタックスハイライト付きで表示する。
+
+#### 比較対象
+
+- 設定ファイルで指定されたベースブランチ（デフォルト: `develop`）
+- ユーザーが任意に変更可能
+
+#### 実装例
+
+```typescript
+import simpleGit from "simple-git";
+
+const getDiff = async (worktreePath: string, baseBranch: string) => {
+  const git = simpleGit(worktreePath);
+  const diff = await git.diff([baseBranch, "HEAD"]);
+  return diff;
+};
+```
+
+#### 表示UI
+
+```
+┌─ Diff: develop...feature-auth ──────────────────────┐
+│ src/auth/login.tsx                                  │
+│ ─────────────────────────────────────────────────── │
+│   10 │ import { useState } from 'react';            │
+│ + 11 │ import { validateEmail } from './utils';     │
+│   12 │                                              │
+│ - 15 │ const handleSubmit = () => {                 │
+│ + 15 │ const handleSubmit = async () => {           │
+│ + 16 │   if (!validateEmail(email)) {               │
+│ + 17 │     setError('Invalid email');               │
+│ + 18 │     return;                                  │
+│ + 19 │   }                                          │
+│                                                     │
+│ [←/→] ファイル切替  [b] ベース変更  [Esc] 閉じる   │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+### 10. ターミナル分割機能
+
+#### 機能概要
+
+画面を水平・垂直に分割し、複数のターミナルペインを同時に表示・操作可能にする。
+
+#### 分割方式
+
+- **水平分割**: 左右に並べる
+- **垂直分割**: 上下に並べる
+- **無制限分割**: 分割数に制限なし
+
+#### ペイン管理
+
+```typescript
+interface TerminalPane {
+  id: number;
+  command?: string;
+  cwd: string;
+  output: string[];
+  isActive: boolean;
+}
+
+interface PaneLayout {
+  type: "horizontal" | "vertical" | "leaf";
+  children?: PaneLayout[];
+  pane?: TerminalPane;
+  ratio: number; // 0-1の比率
+}
+```
+
+#### キーバインド
+
+| キー                          | 動作                               |
+| ----------------------------- | ---------------------------------- |
+| `Ctrl+Shift+H`                | 水平分割（設定でカスタマイズ可能） |
+| `Ctrl+Shift+V`                | 垂直分割（設定でカスタマイズ可能） |
+| `<prefix>+1`, `<prefix>+2`... | 指定番号のペインにフォーカス移動   |
+| `Ctrl+Shift+W`                | 現在のペインを閉じる               |
+| `Ctrl+Shift+←/→/↑/↓`          | 隣接ペインにフォーカス移動         |
+
+#### 表示UI
+
+```
+┌─ Terminal 1 ────────────┬─ Terminal 2 ────────────┐
+│ $ npm run dev           │ $ npm test              │
+│ > dev server running... │ > running tests...      │
+│ > localhost:3000        │ ✓ 15 tests passed       │
+│                         │                         │
+├─────────────────────────┴─────────────────────────┤
+│ Terminal 3                                        │
+│ $ git status                                      │
+│ On branch feature-auth                            │
+│ Changes not staged for commit:                    │
+│   modified: src/auth/login.tsx                    │
+└───────────────────────────────────────────────────┘
+[Alt+1] T1  [Alt+2] T2  [Alt+3] T3  [Ctrl+Shift+H] 水平分割
+```
+
+---
+
+### 11. 動作確認コマンド実行
+
+#### 機能概要
+
+worktree内で動作確認コマンドを実行可能にする。事前定義コマンドの選択と任意コマンドの入力に対応。
+
+#### コマンド種別
+
+1. **事前定義コマンド**: 設定ファイルまたは`package.json`のscriptsから選択
+2. **任意コマンド**: ユーザーが自由にシェルコマンドを入力
+
+#### 実装例
+
+```typescript
+// package.jsonからscriptsを読み込み
+const loadPackageScripts = async (worktreePath: string) => {
+  const pkg = await Bun.file(`${worktreePath}/package.json`).json();
+  return Object.entries(pkg.scripts || {}).map(([name, command]) => ({
+    name,
+    command: `npm run ${name}`,
+    description: command as string,
+  }));
+};
+```
+
+#### 表示UI
+
+```
+┌─ Run Command ───────────────────────────────────────┐
+│ Select command or enter custom:                     │
+│                                                     │
+│ ▶ npm run build       - Build the project          │
+│   npm run test        - Run tests                   │
+│   npm run dev         - Start dev server            │
+│   npm run lint        - Run linter                  │
+│   ────────────────────────────────────────────────  │
+│   [Custom command...]                               │
+│                                                     │
+│ [↑/↓] 選択  [Enter] 実行  [/] カスタム入力  [Esc] 閉じる │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+### 12. オプション機能
+
+#### Linter/Formatter検知・アラート（できれば）
+
+プロジェクトのlinter/formatter設定を検知し、非対応部分があればUIでアラートを表示する。
+
+```typescript
+// 検知対象
+const detectLinterConfig = async (path: string) => {
+  const configs = [
+    ".eslintrc",
+    ".eslintrc.js",
+    "eslint.config.js",
+    ".prettierrc",
+    "biome.json",
+    "oxlint.json",
+  ];
+  // 設定ファイルの存在確認とパース
+};
+```
+
+#### PR状態表示（できれば）
+
+GitHub PRの状態（OPEN, DRAFT, CLOSED）を表示する。
+
+```typescript
+// gh CLI連携
+const getPRStatus = async (branch: string) => {
+  const { stdout } = await execAsync(
+    `gh pr view ${branch} --json state,isDraft`
+  );
+  return JSON.parse(stdout);
+};
+```
+
+表示例:
+
+```
+│  ▶ feature-auth  ~/project-worktrees/feat..  [PR: OPEN]      │
+│    hotfix-123    ~/project-worktrees/fix..  [PR: DRAFT]     │
+```
+
+---
+
 ## UI/UXデザイン
 
 ### 全体レイアウト
@@ -309,6 +686,24 @@ const theme = {
 | `g p` | git push               |
 | `g l` | git log                |
 
+### ターミナルペイン操作
+
+| キー                 | 動作                                   |
+| -------------------- | -------------------------------------- |
+| `Ctrl+Shift+H`       | 水平分割（設定でカスタマイズ可能）     |
+| `Ctrl+Shift+V`       | 垂直分割（設定でカスタマイズ可能）     |
+| `Alt+1`, `Alt+2`...  | ペイン切り替え（プレフィックス設定可） |
+| `Ctrl+Shift+W`       | 現在のペインを閉じる                   |
+| `Ctrl+Shift+←/→/↑/↓` | 隣接ペインにフォーカス移動             |
+
+### 表示操作
+
+| キー | 動作                 |
+| ---- | -------------------- |
+| `D`  | Diff表示             |
+| `H`  | AI履歴表示           |
+| `C`  | コマンドパレット表示 |
+
 ---
 
 ## ファイル構成
@@ -326,19 +721,39 @@ worktree-tui/
 │   │   ├── CommandOutput.tsx     # コマンド出力表示
 │   │   ├── GitStatus.tsx         # gitステータス表示
 │   │   ├── ConfirmDialog.tsx     # 確認ダイアログ
-│   │   └── HelpModal.tsx         # ヘルプ画面
+│   │   ├── HelpModal.tsx         # ヘルプ画面
+│   │   ├── TerminalPane.tsx      # ターミナルペイン
+│   │   ├── PaneLayout.tsx        # ペイン分割レイアウト
+│   │   ├── DiffViewer.tsx        # diff表示（シンタックスハイライト）
+│   │   ├── PromptHistory.tsx     # AI履歴表示
+│   │   └── CommandPalette.tsx    # コマンド選択・実行
 │   ├── hooks/
 │   │   ├── useWorktree.ts        # worktree操作フック
 │   │   ├── useGit.ts             # git操作フック
 │   │   ├── useCommand.ts         # コマンド実行フック
-│   │   └── useKeyboard.ts        # キーボード操作フック
+│   │   ├── useKeyboard.ts        # キーボード操作フック
+│   │   ├── usePanes.ts           # ペイン管理フック
+│   │   └── useConfig.ts          # 設定読み込みフック
 │   ├── lib/
 │   │   ├── worktree.ts           # worktree関連ユーティリティ
 │   │   ├── gtr.ts                # gtr連携
-│   │   └── git.ts                # git操作
+│   │   ├── git.ts                # git操作
+│   │   └── config.ts             # 設定ファイル読み書き
+│   ├── db/
+│   │   ├── index.ts              # データベース初期化
+│   │   ├── schema.ts             # スキーマ定義
+│   │   └── history.ts            # 履歴操作
+│   ├── i18n/
+│   │   ├── index.ts              # i18n初期化
+│   │   ├── useTranslation.ts     # 翻訳フック
+│   │   └── locales/
+│   │       ├── ja.json           # 日本語
+│   │       └── en.json           # 英語
 │   └── types/
 │       ├── worktree.ts           # 型定義
-│       └── command.ts
+│       ├── command.ts
+│       ├── config.ts             # 設定型定義
+│       └── pane.ts               # ペイン型定義
 └── README.md
 ```
 
@@ -363,6 +778,22 @@ worktree-tui/
   }
 }
 ```
+
+#### 追加依存パッケージ（新機能用）
+
+```json
+{
+  "dependencies": {
+    "diff": "^7.0.0",
+    "diff2html": "^3.4.0"
+  }
+}
+```
+
+**注記:**
+
+- SQLite: Bunの組み込み `bun:sqlite` を使用（追加パッケージ不要）
+- i18n: 軽量な独自実装（追加パッケージ不要）
 
 ### TypeScript設定
 
@@ -420,37 +851,68 @@ worktree-tui/
 
 ## 実装フェーズ
 
-### Phase 1: 基本機能（2週間）
+### Phase 1: 基本機能
 
 - [x] プロジェクトセットアップ
 - [ ] worktree一覧表示
 - [ ] worktree選択・移動
 - [ ] 基本的なキーボードナビゲーション
 
-### Phase 2: Git連携（1週間）
+### Phase 2: 設定・多言語対応
+
+- [ ] 設定ファイル（JSON）の読み書き
+- [ ] i18n基盤実装
+- [ ] 日本語・英語の言語ファイル作成
+
+### Phase 3: Git連携
 
 - [ ] git status表示
 - [ ] simple-git統合
 - [ ] 基本的なgit操作（add, commit, push）
 
-### Phase 3: gtr連携（1週間）
+### Phase 4: gtr連携
 
 - [ ] gtr new/rm コマンド実行
 - [ ] gtr設定読み込み
 - [ ] エディタ・AIツール起動
 
-### Phase 4: コマンド実行（1週間）
+### Phase 5: 履歴管理
 
-- [ ] ビルド・テスト実行
+- [ ] SQLiteデータベース初期化
+- [ ] worktree作成履歴の保存
+- [ ] AI入力履歴の保存・表示
+
+### Phase 6: Diff表示
+
+- [ ] ベースブランチとの差分取得
+- [ ] シンタックスハイライト実装
+- [ ] ファイル切り替えUI
+
+### Phase 7: ターミナル分割
+
+- [ ] ペインレイアウト管理
+- [ ] 水平・垂直分割
+- [ ] ペイン間フォーカス移動
+- [ ] カスタマイズ可能なショートカット
+
+### Phase 8: コマンド実行
+
+- [ ] 事前定義コマンド選択UI
+- [ ] 任意コマンド入力
 - [ ] リアルタイム出力表示
 - [ ] エラーハンドリング
 
-### Phase 5: UI改善（1週間）
+### Phase 9: UI改善
 
 - [ ] カラースキーマ実装
 - [ ] ステータスバー実装
 - [ ] ヘルプモーダル
 - [ ] 確認ダイアログ
+
+### Phase 10: オプション機能（できれば）
+
+- [ ] Linter/Formatter検知・アラート
+- [ ] PR状態表示（gh CLI連携）
 
 ---
 
