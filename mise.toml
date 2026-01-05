@@ -197,5 +197,6 @@ echo '🚀 Setting up worktree-tui...'
 mise install
 bun install
 bunx lefthook install
+claude mcp reset-project-choices
 echo '✅ Setup complete!'
 """

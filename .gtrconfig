@@ -1,0 +1,26 @@
+[copy]
+    # Project configuration files
+    include = .claude/settings.local.json
+
+    # TODO files
+    include = todo.md
+    include = **.todo.md
+
+    # Exclude sensitive files
+    exclude = **/.env
+    exclude = **/.env.*
+
+    # Exclude build artifacts and caches
+    excludeDirs = node_modules
+    excludeDirs = dist
+    excludeDirs = .turbo
+    excludeDirs = .cache
+    excludeDirs = coverage
+
+[hooks]
+    postCreate = mise install
+    postCreate = nohup bun install > /dev/null 2>&1 &
+
+[defaults]
+    editor = cursor
+    ai = claude
