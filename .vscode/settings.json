@@ -1,0 +1,132 @@
+{
+  // ==========================================================================
+  // エディタ基本設定
+  // ==========================================================================
+  // 保存時に自動フォーマット
+  "editor.formatOnSave": true,
+  // ペースト時のフォーマットは無効（意図しない変更を防ぐ）
+  "editor.formatOnPaste": false,
+  // デフォルトフォーマッターは言語別に設定するためnull
+  "editor.defaultFormatter": null,
+  // インデント設定
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  // 100文字でルーラー表示
+  "editor.rulers": [
+    100
+  ],
+  // 折り返しなし（Markdown以外）
+  "editor.wordWrap": "off",
+  // 保存時のコードアクション
+  "editor.codeActionsOnSave": {
+    // Oxlintの自動修正を実行
+    "source.fixAll.oxc": "explicit",
+    // import整理は無効（Oxfmtのsort機能を使用）
+    "source.organizeImports": "never"
+  },
+  // ==========================================================================
+  // 言語別フォーマッター設定
+  // ==========================================================================
+  // TypeScript → Oxfmt
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  // TypeScript React → Oxfmt
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  // JavaScript → Oxfmt
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  // JavaScript React → Oxfmt
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  // JSON → Oxfmt
+  "[json]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  // JSONC (コメント付きJSON) → Oxfmt
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  // Markdown → dprint
+  "[markdown]": {
+    "editor.defaultFormatter": "dprint.dprint",
+    "editor.wordWrap": "on"
+  },
+  // YAML → dprint
+  "[yaml]": {
+    "editor.defaultFormatter": "dprint.dprint"
+  },
+  // TOML → dprint
+  "[toml]": {
+    "editor.defaultFormatter": "dprint.dprint"
+  },
+  // CSS → dprint
+  "[css]": {
+    "editor.defaultFormatter": "dprint.dprint"
+  },
+  // ==========================================================================
+  // Oxc (Oxlint + Oxfmt) 設定
+  // ==========================================================================
+  // Lintを有効化
+  "oxc.lint.enable": true,
+  // タイピング中にLint実行（"onSave"も可能）
+  "oxc.lint.run": "onType",
+  // Formatterを有効化
+  "oxc.fmt.enable": true,
+  // ==========================================================================
+  // dprint 設定
+  // ==========================================================================
+  // ローカルのdprintを使用
+  "dprint.path": "./node_modules/.bin/dprint",
+  // ==========================================================================
+  // TypeScript 設定
+  // ==========================================================================
+  // import文のパス形式（相対パスではなくエイリアス優先）
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  // 自動import提案を有効化
+  "typescript.suggest.autoImports": true,
+  // ファイル移動時にimportパスを自動更新
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  // プロジェクトのTypeScriptを使用
+  "typescript.tsdk": "node_modules/typescript/lib",
+  // ==========================================================================
+  // ファイル関連付け
+  // ==========================================================================
+  "files.associations": {
+    "*.css": "css",
+    ".oxlintrc.json": "jsonc",
+    ".oxfmtrc.json": "jsonc",
+    "dprint.json": "jsonc",
+    "mise.toml": "toml",
+    "lefthook.yml": "yaml"
+  },
+  // ==========================================================================
+  // ファイルエクスプローラーから除外
+  // ==========================================================================
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/.dprint": true
+  },
+  // ==========================================================================
+  // 検索から除外
+  // ==========================================================================
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/bun.lock": true,
+    "**/.dprint": true
+  },
+  // ==========================================================================
+  // 競合する拡張機能を無効化
+  // ==========================================================================
+  "prettier.enable": false,
+}

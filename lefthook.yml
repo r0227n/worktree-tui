@@ -1,0 +1,60 @@
+# lefthook.yml - Git hooks configuration
+# https://github.com/evilmartians/lefthook
+
+colors: true
+
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{ts,tsx,js,jsx}"
+      run: mise run lint:fix -- {staged_files}
+      stage_fixed: true
+
+    format-ts:
+      glob: "*.{ts,tsx,js,jsx}"
+      run: mise run format:ts -- {staged_files}
+      stage_fixed: true
+
+    format-other:
+      glob: "*.{md,yaml,yml,toml,css}"
+      run: mise run format:other -- {staged_files}
+      stage_fixed: true
+
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: mise run typecheck
+
+pre-push:
+  parallel: true
+  commands:
+    lint-all:
+      run: mise run lint
+
+    format-check:
+      run: mise run format:check
+
+    typecheck:
+      run: mise run typecheck
+
+    test:
+      run: mise run test
+
+commit-msg:
+  commands:
+    conventional:
+      run: |
+        commit_msg=$(cat {1})
+        pattern="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{1,}"
+        if ! echo "$commit_msg" | grep -qE "$pattern"; then
+          echo "❌ Invalid commit message format!"
+          echo ""
+          echo "Expected format: <type>(<scope>): <subject>"
+          echo "Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+          echo ""
+          echo "Examples:"
+          echo "  feat(terminal): add preset selection dialog"
+          echo "  fix(worktree): resolve path resolution issue"
+          echo "  docs: update README with installation steps"
+          exit 1
+        fi

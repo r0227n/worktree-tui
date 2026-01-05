@@ -1,0 +1,202 @@
+# mise.toml - Tool version management for worktree-tui
+# https://mise.jdx.dev
+
+[tools]
+bun = "1.3.5"
+zig = "0.14.1"
+dprint = "0.49.0"
+
+[env]
+NODE_ENV = "development"
+FORCE_COLOR = "1"
+
+# =============================================================================
+# Development Tasks
+# =============================================================================
+
+[tasks.dev]
+description = "Start development server with watch mode"
+run = "bun run --watch src/index.tsx"
+
+[tasks.build]
+description = "Build the application"
+run = "bun build src/index.tsx --outdir dist --target bun"
+
+[tasks.start]
+description = "Run the built application"
+depends = ["build"]
+run = "bun run dist/index.js"
+
+# =============================================================================
+# Code Quality Tasks
+# =============================================================================
+
+[tasks.lint]
+description = "Run linter"
+run = "bunx oxlint"
+
+[tasks."lint:fix"]
+description = "Run linter with auto-fix"
+run = "bunx oxlint --fix $@"
+
+[tasks."lint:types"]
+description = "Run linter with type-aware rules"
+run = "bunx oxlint --type-aware"
+
+[tasks.format]
+description = "Format all files"
+run = """
+bunx oxfmt
+bunx dprint fmt
+"""
+
+[tasks."format:ts"]
+description = "Format TypeScript/JavaScript files"
+run = "bunx oxfmt $@"
+
+[tasks."format:other"]
+description = "Format other files (markdown, yaml, toml, css)"
+run = "bunx dprint fmt $@"
+
+[tasks."format:check"]
+description = "Check formatting without writing"
+run = """
+bunx oxfmt --check
+bunx dprint check
+"""
+
+[tasks.typecheck]
+description = "Run TypeScript type checking"
+run = "bun tsc --noEmit"
+
+[tasks.check]
+description = "Run all checks (lint, format, typecheck)"
+depends = ["lint", "format:check", "typecheck"]
+run = "echo '✅ All checks passed!'"
+
+[tasks.fix]
+description = "Fix all auto-fixable issues"
+depends = ["lint:fix", "format"]
+run = "echo '✅ All fixes applied!'"
+
+# =============================================================================
+# Test Tasks
+# =============================================================================
+
+[tasks.test]
+description = "Run tests"
+run = "bun test"
+
+[tasks."test:watch"]
+description = "Run tests in watch mode"
+run = "bun test --watch"
+
+[tasks."test:coverage"]
+description = "Run tests with coverage"
+run = "bun test --coverage"
+
+# =============================================================================
+# CI Tasks
+# =============================================================================
+
+[tasks.ci]
+description = "Run CI pipeline"
+depends = ["typecheck", "ci:lint", "ci:format", "ci:test"]
+run = "echo '✅ CI pipeline passed!'"
+
+[tasks."ci:lint"]
+description = "Lint changed TypeScript files only (CI)"
+run = '''
+echo "🔍 Checking for changed TypeScript files..."
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR origin/develop...HEAD | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$CHANGED_FILES" ]; then
+  echo "📝 Found changed TypeScript files:"
+  echo "$CHANGED_FILES"
+  echo ""
+  echo "Running oxlint..."
+  echo "$CHANGED_FILES" | xargs bunx oxlint
+else
+  echo "✅ No TypeScript files changed, skipping lint"
+fi
+'''
+
+[tasks."ci:format"]
+description = "Check formatting of changed files only (CI)"
+run = '''
+echo "🔍 Checking for changed files..."
+
+# TypeScript files
+TS_FILES=$(git diff --name-only --diff-filter=ACMR origin/develop...HEAD | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$TS_FILES" ]; then
+  echo "📝 Checking TypeScript files with oxfmt:"
+  echo "$TS_FILES"
+  echo "$TS_FILES" | xargs bunx oxfmt --check
+fi
+
+# Other files (markdown, yaml, toml, css)
+OTHER_FILES=$(git diff --name-only --diff-filter=ACMR origin/develop...HEAD | grep -E '\.(md|yml|yaml|toml|css)$' || true)
+if [ -n "$OTHER_FILES" ]; then
+  echo "📝 Checking other files with dprint:"
+  echo "$OTHER_FILES"
+  echo "$OTHER_FILES" | xargs bunx dprint check
+fi
+
+if [ -z "$TS_FILES" ] && [ -z "$OTHER_FILES" ]; then
+  echo "✅ No format-checkable files changed, skipping format check"
+fi
+'''
+
+[tasks."ci:test"]
+description = "Run tests for changed files (CI)"
+run = '''
+echo "🔍 Checking for changed TypeScript files..."
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR origin/develop...HEAD | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$CHANGED_FILES" ]; then
+  echo "🧪 Running tests for changed files:"
+  echo "$CHANGED_FILES"
+  echo ""
+  bun test $CHANGED_FILES
+else
+  echo "✅ No TypeScript files changed, skipping tests"
+fi
+'''
+
+# =============================================================================
+# Utility Tasks
+# =============================================================================
+
+[tasks.clean]
+description = "Clean build artifacts and caches"
+run = "rm -rf dist coverage .dprint node_modules/.cache"
+
+[tasks.doctor]
+description = "Check development environment"
+run = """
+echo '🔍 Checking environment...'
+echo ''
+echo '📦 Tools:'
+mise ls
+echo ''
+echo '🔧 Versions:'
+bun --version
+zig version
+dprint --version
+bunx oxlint --version
+bunx oxfmt --version || echo 'oxfmt: installed via bunx'
+echo ''
+echo '📁 Project:'
+ls -la
+echo ''
+echo '✅ Environment check complete!'
+"""
+
+[tasks.setup]
+description = "Initial project setup"
+run = """
+echo '🚀 Setting up worktree-tui...'
+mise install
+bun install
+bunx lefthook install
+claude mcp reset-project-choices
+echo '✅ Setup complete!'
+"""

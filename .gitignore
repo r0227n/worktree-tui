@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+bun.lock
+
+# Build outputs
+dist/
+*.log
+
+# Test coverage
+coverage/
+
+# Cache directories
+.cache/
+.dprint/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local

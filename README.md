@@ -1,8 +1,8 @@
 # worktree-tui
 
-English | [日本語](./docs/README.ja.md)
+English | [日本語](docs/README.ja.md)
 
-A Terminal User Interface (TUI) tool for managing Git worktrees
+A terminal user interface (TUI) tool for managing Git worktrees.
 
 ## Overview
 
@@ -10,11 +10,11 @@ worktree-tui is a terminal-based interactive tool built with React + OpenTUI tha
 
 ## Features
 
-- 📋 **Worktree List** - Visual display of all worktrees in the repository
+- 📋 **Worktree List Display** - Visually display all worktrees in the repository
 - 🔄 **Worktree Navigation** - Seamless switching between worktrees
 - 🛠️ **Build/Run Commands** - Execute build, test, and run commands on worktrees
 - 📝 **Git Operations** - Basic operations like status, add, commit, push, pull
-- 🔗 **git-worktree-runner Integration** - Integration with gtr commands
+- 🔗 **git-worktree-runner Integration** - Integration with gtr command
 
 ## Requirements
 
@@ -31,57 +31,57 @@ worktree-tui is a terminal-based interactive tool built with React + OpenTUI tha
 git clone https://github.com/r0227n/worktree-tui.git
 cd worktree-tui
 
-# Install dependencies
-bun install
+# Setup (install dependencies + lefthook configuration)
+mise run setup
 ```
 
 ## Usage
 
-Run the following command in the root directory of your repository:
+Run the following command in the repository root directory:
 
 ```bash
-bun run start
+mise run start
 ```
 
 ## Keyboard Shortcuts
 
 ### Global
 
-| Key | Action |
-|-----|--------|
+| Key       | Action                      |
+| --------- | --------------------------- |
 | `↑` / `↓` | Navigate worktree selection |
-| `Enter` | Move to selected worktree |
-| `Tab` | Move to next worktree |
-| `Esc` | Close menu/dialog |
-| `Ctrl+C` | Quit application |
-| `?` | Show help |
+| `Enter`   | Switch to selected worktree |
+| `Tab`     | Move to next worktree       |
+| `Esc`     | Close menu/dialog           |
+| `Ctrl+C`  | Exit application            |
+| `?`       | Show help                   |
 
 ### Worktree Operations
 
-| Key | Action |
-|-----|--------|
-| `n` | Create new worktree |
+| Key | Action                   |
+| --- | ------------------------ |
+| `n` | Create new worktree      |
 | `d` | Delete selected worktree |
-| `r` | Refresh worktrees |
+| `r` | Refresh worktrees        |
 
 ### Development Operations
 
-| Key | Action |
-|-----|--------|
-| `b` | Run build |
-| `t` | Run tests |
+| Key | Action           |
+| --- | ---------------- |
+| `b` | Run build        |
+| `t` | Run tests        |
 | `s` | Start dev server |
-| `e` | Open in editor |
+| `e` | Open in editor   |
 
 ### Git Operations
 
-| Key | Action |
-|-----|--------|
-| `g s` | git status |
+| Key   | Action            |
+| ----- | ----------------- |
+| `g s` | git status        |
 | `g a` | git add (staging) |
-| `g c` | git commit |
-| `g p` | git push |
-| `g l` | git log |
+| `g c` | git commit        |
+| `g p` | git push          |
+| `g l` | git log           |
 
 ## UI Overview
 
@@ -91,9 +91,9 @@ bun run start
 │  Current: ~/project/main (main) ✓                                │
 │                                                                  │
 ├─ Worktrees ─────────────────────────────────────────────────────┤
-│  ▶ main          ~/project/main              [clean]            │
-│    feature-auth  ~/project-worktrees/feat..  [2 changes]        │
-│    hotfix-123    ~/project-worktrees/hotf..  [uncommitted]      │
+│  ▶ main         ~/project/main              [clean]            │
+│    feat/auth    ~/worktrees/feat/auth       [2 changes]        │
+│    fix/login    ~/worktrees/fix/login       [uncommitted]      │
 │                                                                  │
 ├─ Actions ───────────────────────────────────────────────────────┤
 │  [n] New  [d] Delete  [e] Editor  [g] Git  [b] Build  [?] Help  │
@@ -108,19 +108,19 @@ bun run start
 ### Build
 
 ```bash
-bun run build
+mise run build
 ```
 
 ### Test
 
 ```bash
-bun test
+mise run test
 ```
 
-### Dev Server
+### Development Server
 
 ```bash
-bun run dev
+mise run dev
 ```
 
 ## Tech Stack
@@ -132,19 +132,15 @@ bun run dev
 
 ## Documentation
 
-For detailed specifications, see [docs/spec.md](./docs/spec.md).
+For detailed specifications, see [spec.md](docs/spec.md).
 
 ## License
 
-MIT License - see the [LICENSE](./LICENSE) file for details.
+MIT License - See [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
-
-## Author
-
-Ryo24 ([@r0227n](https://github.com/r0227n))
 
 ## Acknowledgments
 
