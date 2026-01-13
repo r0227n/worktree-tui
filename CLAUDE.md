@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-worktree-tui is a terminal-based interactive tool for managing Git worktrees, built with React + OpenTUI. It's based on [git-worktree-runner](https://github.com/coderabbitai/git-worktree-runner) and provides intuitive TUI-based operations for Git worktree management.
+worktree-code-review is a terminal-based interactive tool for managing Git worktrees, built with React + OpenTUI. It's based on [git-worktree-runner](https://github.com/coderabbitai/git-worktree-runner) and provides intuitive TUI-based operations for Git worktree management.
 
 If you are unsure about the user's intent, execute AskUserQuestion.
 
@@ -45,36 +45,6 @@ mise run fix            # Auto-fix all issues (lint:fix + format)
 mise run ci           # Run all tests
 ```
 
-## Architecture
-
-### Project Structure
-
-The codebase follows a React + OpenTUI architecture with TypeScript path aliases:
-
-```
-src/
-├── index.tsx           # Entry point
-├── components/         # React TUI components (@/components/*)
-│   ├── WorktreeList.tsx      # Worktree list display
-│   ├── CommandOutput.tsx     # Command output viewer
-│   ├── GitStatus.tsx         # Git status display
-│   ├── ConfirmDialog.tsx     # Confirmation dialogs
-│   └── HelpModal.tsx         # Help screen
-├── hooks/              # Custom React hooks (@/hooks/*)
-│   ├── useWorktree.ts        # Worktree operations
-│   ├── useGit.ts             # Git operations
-│   ├── useCommand.ts         # Command execution
-│   └── useKeyboard.ts        # Keyboard input handling
-├── services/           # Business logic (@/services/*)
-│   ├── worktree.ts           # Worktree utilities
-│   ├── gtr.ts                # gtr CLI integration
-│   └── git.ts                # Git operations wrapper
-├── types/              # TypeScript types (@/types/*)
-│   ├── worktree.ts
-│   └── command.ts
-└── utils/              # Utility functions (@/utils/*)
-```
-
 ### TypeScript Path Aliases
 
 The project uses TypeScript path aliases configured in `tsconfig.json`:
@@ -86,24 +56,11 @@ The project uses TypeScript path aliases configured in `tsconfig.json`:
 - `@/types/*` → `./src/types/*`
 - `@/utils/*` → `./src/utils/*`
 
-### Key Data Structures
-
-```typescript
-interface Worktree {
-  path: string;
-  branch: string;
-  head: string;      // SHA hash
-  isMain: boolean;
-  isBare: boolean;
-}
-```
-
 ### Core Functionality
 
 1. **Worktree Management**: Uses `git worktree list --porcelain` parsed into structured data
 2. **Git Operations**: Wrapped through `simple-git` library for type-safe async operations
-3. **gtr Integration**: Executes gtr CLI commands via child processes for worktree automation
-4. **TUI Rendering**: OpenTUI React components handle keyboard input and terminal rendering
+3. **TUI Rendering**: OpenTUI React components handle keyboard input and terminal rendering
 
 ## Code Style & Quality
 

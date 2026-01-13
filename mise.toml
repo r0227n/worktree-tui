@@ -1,4 +1,4 @@
-# mise.toml - Tool version management for worktree-tui
+# mise.toml - Tool version management for worktree-code-review
 # https://mise.jdx.dev
 
 [tools]
@@ -193,7 +193,7 @@ echo '✅ Environment check complete!'
 [tasks.setup]
 description = "Initial project setup"
 run = """
-echo '🚀 Setting up worktree-tui...'
+echo '🚀 Setting up worktree-code-review...'
 mise install
 bun install
 bunx lefthook install

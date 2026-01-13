@@ -1,5 +1,5 @@
 {
-  "name": "worktree-tui",
+  "name": "worktree-code-review",
   "version": "0.1.0",
   "description": "Git worktree manager with terminal multiplexer and AI agent integration",
   "type": "module",
@@ -7,7 +7,7 @@
   "author": "Ryo24",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ryo24/worktree-tui.git"
+    "url": "https://github.com/ryo24/worktree-code-review.git"
   },
   "keywords": [
     "git",
@@ -17,7 +17,7 @@
     "cli"
   ],
   "bin": {
-    "worktree-tui": "./dist/index.js"
+    "worktree-code-review": "./dist/index.js"
   },
   "files": [
     "dist"

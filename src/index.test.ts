@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-describe("worktree-tui", () => {
+describe("worktree-code-review", () => {
   it("should pass a dummy test", () => {
     expect(true).toBe(true);
   });
